@@ -1,0 +1,121 @@
+{
+  "name": "mrtrix_multishell_msmt_version2020",
+  "space": "T1w",
+  "atlases": ["schaefer100_tianS1", "schaefer200_tianS2", "schaefer400_tianS4"],
+  "anatomical": ["mrtrix_5tt"],
+  "nodes": [
+    {
+      "name": "dhollander",
+      "software": "MRTrix3",
+      "action": "csd",
+      "output_suffix": "dhollander",
+      "input": "qsiprep",
+      "parameters": {
+        "mtnormalize": true,
+        "response": {
+          "algorithm": "dhollander"
+        },
+        "fod": {
+          "algorithm": "msmt_csd",
+          "max_sh": [
+            4,
+            8,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "name": "track_ifod2_dhollander",
+      "software": "MRTrix3",
+      "action": "tractography",
+      "output_suffix": "ifod2_dhollander",
+      "input": "dhollander",
+      "parameters": {
+        "use_5tt": true,
+        "use_sift2": true,
+        "tckgen": {
+          "algorithm": "iFOD2",
+          "select": 100000000,
+          "max_length": 300,
+          "min_length": 30,
+          "power": 0.33,
+          "crop_at_gmwmi": true,
+          "backtrack": true,
+		      "nthreads": 32
+        },
+        "sift2": {}
+      }
+    },
+    {
+      "name": "mrtrix_conn_dhollander",
+      "software": "MRTrix3",
+      "action": "connectivity",
+      "output_suffix": "connectivity_dhollander",
+      "input": "track_ifod2_dhollander",
+      "parameters": 
+      {
+        "tck2connectome": [
+          {
+            "use_sift_weights": false,
+            "zero_diagonal": false,
+            "search_radius": 2.0,
+            "symmetric": true,
+            "stat_edge": "sum",
+            "measure": "count_nosift",
+            "nthreads": 32
+          },
+          {
+            "use_sift_weights": true,
+            "zero_diagonal": false,
+            "search_radius": 2.0,
+            "symmetric": true,
+            "stat_edge": "sum",
+            "measure": "count_sift",
+            "nthreads": 32
+          },
+          {
+            "use_sift_weights": false,
+            "zero_diagonal": false,
+            "search_radius": 2.0,
+            "symmetric": true,
+            "length_scale": "length",
+            "stat_edge": "mean",
+            "measure": "meanlength_nosift",
+            "nthreads": 32
+          },
+          {
+            "use_sift_weights": true,
+            "zero_diagonal": false,
+            "search_radius": 2.0,
+            "symmetric": true,
+            "length_scale": "length",
+            "stat_edge": "mean",
+            "measure": "meanlength_sift",
+            "nthreads": 32
+          },
+          {
+            "use_sift_weights": false,
+            "zero_diagonal": false,
+            "search_radius": 2.0,
+            "symmetric": true,
+            "scale_invnodevol": true,
+            "stat_edge": "sum",
+            "measure": "countinvnodevol_nosift",
+            "nthreads": 32
+          },
+          {
+            "use_sift_weights": true,
+            "zero_diagonal": false,
+            "search_radius": 2.0,
+            "symmetric": true,
+            "scale_invnodevol": true,
+            "stat_edge": "sum",
+            "measure": "countinvnodevol_sift",
+            "nthreads": 32
+          }
+        ]
+      }
+    }
+  ]
+}
