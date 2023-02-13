@@ -234,13 +234,13 @@ def sphere_seed_to_voxel(subj, seeds, metrics, atlases=['Harrison2009'], args=No
                                  subj+'_task-rest_space-'+img_space+'_desc-'+metric+'.nii.gz')
         bold_img = nib.load(bold_file)
         brain_masker = NiftiMasker(smoothing_fwhm=args.brain_smoothing_fwhm, t_r=0.81, \
-            low_pass=0.1, high_pass=0.01, verbose=0)
+            low_pass=0.1, high_pass=0.01, verbose=0)  # assumes signal is already normalized, otherwise use standardize=True
         voxels_ts = brain_masker.fit_transform(bold_img)
 
         # extract seed timeseries and perform seed-to-voxel correlation
         for seed in seeds:
             seed_masker = NiftiSpheresMasker([np.array(seed_loc[seed])], radius=3.5, t_r=0.81, \
-                                low_pass=0.1, high_pass=0.01, verbose=0)
+                                low_pass=0.1, high_pass=0.01, verbose=0) # assumes signal is already normalized, otherwise use standardize=True
             seed_ts = np.squeeze(seed_masker.fit_transform(bold_img))
             seed_to_voxel_corr = np.dot(voxels_ts.T, seed_ts)/seed_ts.shape[0]
             seed_to_voxel_corr_img = brain_masker.inverse_transform(seed_to_voxel_corr)
